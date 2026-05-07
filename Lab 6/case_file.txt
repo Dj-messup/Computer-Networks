@@ -1,0 +1,14 @@
+CASE ID: CMU-CYBER-042
+TITLE: Network Evidence Transfer Report
+
+This simulated case file is used for the socket programming assignment.
+The investigator client connects to the evidence vault server and requests a file transfer.
+The server reads this file in small chunks and sends each chunk through the socket.
+This file is intentionally longer than the socket buffer size so the program must handle multiple reads and sends.
+
+Evidence Notes:
+1. Client connected to the evidence vault server.
+2. Client selected file transfer mode.
+3. Server opened the case file.
+4. Server sent the file in chunks.
+5. Client saved the received data into received_case_file.txt.
