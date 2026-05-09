@@ -8,50 +8,25 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-static void print_address(const struct addrinfo *entry)
-{
-    char ip_string[INET6_ADDRSTRLEN];
-    void *address_pointer = NULL;
-    const char *version = NULL;
-
-    if (entry->ai_family == AF_INET) {
-        struct sockaddr_in *ipv4_address = (struct sockaddr_in *)entry->ai_addr;
-        address_pointer = &(ipv4_address->sin_addr);
-        version = "IPv4";
-    } else if (entry->ai_family == AF_INET6) {
-        struct sockaddr_in6 *ipv6_address = (struct sockaddr_in6 *)entry->ai_addr;
-        address_pointer = &(ipv6_address->sin6_addr);
-        version = "IPv6";
-    } else {
-        return;
-    }
-
-    if (inet_ntop(entry->ai_family, address_pointer, ip_string, sizeof(ip_string)) == NULL) {
-        perror("inet_ntop");
-        return;
-    }
-
-    printf("  %-4s %s\n", version, ip_string);
-}
-
 int main(int argc, char *argv[])
 {
     struct addrinfo hints;
-    struct addrinfo *address_list = NULL;
-    struct addrinfo *current = NULL;
+    struct addrinfo *result;
+    struct addrinfo *p;
     int status;
+    char ip[INET6_ADDRSTRLEN];
 
     if (argc != 2) {
-        fprintf(stderr, "Usage: %s hostname\n", argv[0]);
-        fprintf(stderr, "Example: %s example.com\n", argv[0]);
+        printf("Usage: %s hostname\n", argv[0]);
+        printf("Example: %s example.com\n", argv[0]);
         return 1;
     }
 
-    memset(&hints, 0, sizeof(hints));
+    memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    status = getaddrinfo(argv[1], NULL, &hints, &address_list);
+    status = getaddrinfo(argv[1], NULL, &hints, &result);
 
     if (status != 0) {
         fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
@@ -60,11 +35,32 @@ int main(int argc, char *argv[])
 
     printf("IP addresses for %s:\n", argv[1]);
 
-    for (current = address_list; current != NULL; current = current->ai_next) {
-        print_address(current);
+    for (p = result; p != NULL; p = p->ai_next) {
+        void *addr;
+        char *type;
+        int family = p->ai_family;
+
+        if (family == AF_INET) {
+            struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
+            addr = &(ipv4->sin_addr);
+            type = "IPv4";
+        } else if (family == AF_INET6) {
+            struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
+            addr = &(ipv6->sin6_addr);
+            type = "IPv6";
+        } else {
+            continue;
+        }
+
+        if (inet_ntop(family, addr, ip, sizeof ip) == NULL) {
+            perror("inet_ntop");
+            continue;
+        }
+
+        printf("  %s: %s\n", type, ip);
     }
 
-    freeaddrinfo(address_list);
+    freeaddrinfo(result);
 
     return 0;
 }

@@ -1,63 +1,70 @@
-# Lab 5: Hostname to IP Address Lookup
+# Lab 5: getaddrinfo Host Lookup
 
 ## Overview
 
-For this lab, I wrote a small C program that looks up the IP addresses for a hostname. The program uses `getaddrinfo()` so it can return both IPv4 and IPv6 addresses when they are available.
+For this lab, I wrote a C program that looks up the IP addresses for a hostname. The assignment was based on section 5.1 of Beej's Guide to Network Programming, but I wrote my own version so I could understand what each part was doing.
 
-I tested it with different hostnames to make sure the program was actually resolving names instead of only working for one example.
+The program uses `getaddrinfo()` instead of `gethostbyname()` because `getaddrinfo()` supports both IPv4 and IPv6.
 
 ## Files
 
-| File | Purpose |
-|---|---|
-| `getipaddr.c` | Main C program |
-| `Makefile` | Builds the program |
-| `Screenshots/` | Shows the program compiling and running |
+`getipaddr.c` is the main C program.
 
-## How to Compile
+`getipaddr.out` is the compiled program.
+
+`Screenshots/` contains proof that the program compiled and ran correctly.
+
+## Compile
+
+To compile the program, run:
 
 ```bash
+gcc -Wall -Wextra -pedantic -std=c11 getipaddr.c -o getipaddr.out
+```
+
+Or, if using the Makefile:
+
+```bash
+make clean
 make
 ```
 
-This creates the program:
+## Run
+
+The program needs a hostname as a command line argument.
+
+Example:
 
 ```bash
-./getipaddr
+./getipaddr.out example.com
 ```
 
-## How to Run
-
-Run the program with a hostname:
+Other test:
 
 ```bash
-./getipaddr example.com
-```
-
-Another example:
-
-```bash
-./getipaddr google.com
+./getipaddr.out google.com
 ```
 
 ## What the Program Does
 
-The program takes one hostname from the command line. It passes that hostname into `getaddrinfo()`, then loops through the results. For each result, it checks whether the address is IPv4 or IPv6 and prints the IP address in readable form.
+The program takes the hostname from the command line and passes it into `getaddrinfo()`.
+
+Since `getaddrinfo()` can return more than one address, the program loops through the results and prints each IP address. It checks whether the address is IPv4 or IPv6, then uses `inet_ntop()` to print the address in a readable format.
 
 ## Screenshots
 
 My screenshots show:
 
-| Screenshot | What it Shows |
-|---|---|
-| `Make.png` | The program compiling |
-| `RunExample.png` | The program resolving a hostname |
-| `RunGoogle.png` | Another test with a different hostname |
+`Compile.png` shows the program compiling with no errors.
+
+`Make.png` shows the program compiling through the Makefile.
+
+`RunExample.png` shows the program looking up `example.com`.
+
+`RunGoogle.png` shows the program looking up `google.com`.
 
 ## What I Learned
 
-This lab helped me understand how hostname resolution works in C. Instead of hardcoding an IP address, the program asks the system to look up the address records for a hostname. I also got more practice with command line arguments, structs, and checking whether an address is IPv4 or IPv6.
+This lab helped me understand how hostname lookup works in C. I also got more practice with command line arguments, structs, and looping through linked list results.
 
-## Conclusion
-
-The program successfully takes a hostname, resolves it, and prints the IP addresses that are returned.
+The biggest thing I learned is that a hostname can return multiple addresses, so the program cannot assume there is only one result.
